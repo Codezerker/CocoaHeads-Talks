@@ -25,15 +25,6 @@ let presentation = Presentation(pages: [
     .text("Direct-Address Tables"),
     .text("Hash Tables"),
     .text("Collision Resolutions"),
-    .indent([
-      .text("Chaining"),
-      .text("Open Addressing"),
-      .indent([
-        .text("Linear Probing"),
-        .text("Quadratic Probing"),
-        .text("Double Hashing"),
-      ]),
-    ]),
     .text("Examples"),
     .indent([
       .text("A Basic HashTable"),
@@ -50,9 +41,9 @@ let presentation = Presentation(pages: [
   Page(title: "What is a Hash Table?", contents: [
     .text("Basic operations:"),
     .indent([
-      .text("Insert"),
-      .text("Search"),
-      .text("Delete"),
+      .sourceCode(.plainText, "Insert<K: Hashable, V>(key: K, value: V)"),
+      .sourceCode(.plainText, "Search<K: Hashable, V>(key: K) -> Optional<V>"),
+      .sourceCode(.plainText, "Delete<K: Hashable>(key: K)"),
       .text("All basic operations require O(1) time (on average)"),
     ]),
     .text("Hash Table in programming languages:"),
@@ -60,7 +51,7 @@ let presentation = Presentation(pages: [
       .text("Swift - Dictioanry"),
       .text("Objective-C - NSDictionary/CFDictionary"),
       .text("C++ - std::unordered_map"),
-      .text("Rust - std::HashMap"),
+      .text("Rust - std::collections::HashMap"),
       .text("Python - Dictionary"),
       .text("Ruby - Hash"),
     ]),
@@ -76,15 +67,15 @@ let presentation = Presentation(pages: [
         .text("Search - O(1) worst case"),
         .text("Delete - O(1) worst case"),
       ]),
-      .text("Won't work for unknown number of keys"),
+      .text("Works well when universe of keys is small"),
     ]),
   ]),
 
-  Page(title: "Hash Table", contents: [
+  Page(title: "Hash Tables", contents: [
     .image("./images/hash_table.jpg"),
     .text("Let m be number of slots in the table, then"),
     .indent([
-      .text("h(): U -> {0, 1, ..., m -1 }"),
+      .sourceCode(.plainText, "h(): U -> { 0, 1, ..., m -1 }"),
     ]),
     .text("Time complexity"),
     .indent([
@@ -94,8 +85,42 @@ let presentation = Presentation(pages: [
     ]),
     .text("Why \"average case\" instead of \"worst case\"?"),
     .indent([
-      .text("h(k2) == h(k5)"),
+      .text("Because of collisions: h(k2) == h(k5)"),
+      .text("And rehashing"),
     ]),
+  ]),
+
+  Page(title: "Collision Resolution: Chaining", contents: [
+    .image("./images/chaining.jpg"),
+    .text("TODO"),
+  ]),
+
+  Page(title: "Collision Resolution: Open Addressing", contents: [
+    .text("TODO"),
+  ]),
+
+  Page(title: "Rehashing", contents: [
+    .text("TODO"),
+    .text("Amortization"),
+  ]),
+
+  Page(title: "Example: A Basic HashTable", subtitle: "rust-hachage"),
+
+  Page(title: "Example: NSDictionary/CFDictionary", contents: [
+    .text("TODO"),
+  ]),
+
+  Page(title: "Example: Swift.Dictionary", contents: [
+    .text("TODO"),
+  ]),
+
+  Page(title: "Advanced: Robin Hood Hashing", contents: [
+    .text("TODO"),
+    .text("Used in Rust std::collections::HashMap"),
+  ]),
+
+  Page(title: "Advanced: Google Swiss Table", contents: [
+    .text("TODO"),
   ]),
 
   Page(title: "Thanks!", subtitle: "@eyeplum"),
