@@ -6,6 +6,70 @@ struct HashMap<K: Hashable, V> {
 }
 """
 
+let example_linear_probing = """
+ index |  0  |  1  |  2  |  3  |  4   |  5  |  6  |  7  |
+-------|-----|-----|-----|-----|------|-----|-----|-----|
+ value | 5,7 |     |     | 4,8 | 12,9 |     |     | 8,2 |
+-------|-----|-----|-----|-----|------|-----|-----|-----|
+ slot  |  0  |     |     |  3  |  3   |     |     |  7  |
+"""
+
+let robin_hood_hashing_1 = """
+ index |  0  |  1   |  2  |  3  |  4   |  5  |  6  |  7  |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ value | 5,7 | 29,7 | 6,6 | 3,4 | 12,9 |     |     | 8,2 |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ slot  |  0  |  0   |  1  |  2  |  3   |     |     |  7  |
+          ^
+          | D(13) -> 0
+          | D(5) -> 0
+        (13,3)
+"""
+
+let robin_hood_hashing_2 = """
+ index |  0  |  1   |  2  |  3  |  4   |  5  |  6  |  7  |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ value | 5,7 | 29,7 | 6,6 | 3,4 | 12,9 |     |     | 8,2 |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ slot  |  0  |  0   |  1  |  2  |  3   |     |     |  7  |
+                ^
+                | D(13) -> 1
+                | D(29) -> 1
+              (13,3)
+"""
+
+let robin_hood_hashing_3 = """
+ index |  0  |  1   |  2  |  3  |  4   |  5  |  6  |  7  |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ value | 5,7 | 29,7 | 6,6 | 3,4 | 12,9 |     |     | 8,2 |
+-------|-----|------|-----|-----|------|-----|-----|-----|
+ slot  |  0  |  0   |  1  |  2  |  3   |     |     |  7  |
+                       ^
+                       | D(13) -> 2
+                       | D(6) -> 1
+                     (13,3)
+"""
+
+let robin_hood_hashing_4 = """
+ index |  0  |  1   |  2   |  3  |  4   |  5  |  6  |  7  |
+-------|-----|------|------|-----|------|-----|-----|-----|
+ value | 5,7 | 29,7 | 13,3 | 3,4 | 12,9 |     |     | 8,2 |
+-------|-----|------|------|-----|------|-----|-----|-----|
+ slot  |  0  |  0   |  0   |  2  |  3   |     |     |  7  |
+                       ^
+                       | D(6) -> 1
+                       | D(13) -> 2
+                     (6, 6)
+"""
+
+let robin_hood_hashing_5 = """
+ index |  0  |  1   |  2   |  3  |  4  |  5   |  6  |  7  |
+-------|-----|------|------|-----|-----|------|-----|-----|
+ value | 5,7 | 29,7 | 13,3 | 6,6 | 3,4 | 12,9 |     | 8,2 |
+-------|-----|------|------|-----|-----|------|-----|-----|
+ slot  |  0  |  0   |  0   |  1  |  2  |  3   |     |  7  |
+"""
+
 let presentation = Presentation(pages: [
 
   Page(title: "Hash Tables", subtitle: "An Implementation Detail Series"),
@@ -137,7 +201,7 @@ let presentation = Presentation(pages: [
     .text("Linear probing"),
     .indent([
       .sourceCode(.plainText, "h(k, i) = (h'(k) + i) mod m"),
-      .text("Clustering"),
+      .sourceCode(.plainText, example_linear_probing),
     ]),
     .text("Quadratic probing"),
     .indent([
@@ -186,7 +250,21 @@ let presentation = Presentation(pages: [
   ]),
 
   Page(title: "Advanced: Robin Hood Hashing", contents: [
-    .text("TODO"),
+    .text("\"Takes away from the rich and gives it to the poor\""),
+    .indent([
+      .text("Insert (13,3) where h(13) -> 0"),
+      .text("Awww, but index 0 is occupied 😳"),
+      .sourceCode(.plainText, robin_hood_hashing_1),
+      .text("Check: D(13) > D(5) -> false 😢"),
+      .sourceCode(.plainText, robin_hood_hashing_2),
+      .text("Check: D(13) > D(29) -> false 😢"),
+      .sourceCode(.plainText, robin_hood_hashing_3),
+      .text("Check: D(13) > D(6) -> true 🥺"),
+      .sourceCode(.plainText, robin_hood_hashing_4),
+      .text("Now (6,6) needs a slot 😢"),
+      .text("Repeating the process above until (6,6) is happy 😌"),
+      .sourceCode(.plainText, robin_hood_hashing_5),
+    ]),
     .text("Used in Rust std::collections::HashMap"),
   ]),
 
@@ -194,7 +272,12 @@ let presentation = Presentation(pages: [
     .text("TODO"),
   ]),
 
-  Page(title: "Thanks!", subtitle: "@eyeplum"),
+  Page(title: "References", contents: [
+    .text("Introduction to Algorithms by Cormen,Leiserson,Rivest,Stein"),
+    .text("apple/swift"),
+    .text("apple/swift-corelibs-foundation"),
+    .text("The Swiss Army Knife of Hashmaps by Arrow of Code"),
+  ]),
 
   Page(
     title: "What happens before main()?",
