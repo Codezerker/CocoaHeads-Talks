@@ -158,9 +158,9 @@ let presentation = Presentation(pages: [
       .sourceCode(.plainText, "Insert<K: Hashable, V>(key: K, value: V)"),
       .sourceCode(.plainText, "Search<K: Hashable, V>(key: K) -> Optional<V>"),
       .sourceCode(.plainText, "Delete<K: Hashable>(key: K)"),
-      .text("All basic operations require O(1) time (on average)"),
+      .text("All basic operations should only require O(1) time (on average)"),
     ]),
-    .text("Hash Table in programming languages:"),
+    .text("Hash Tables in programming languages:"),
     .indent([
       .text("Swift - Dictioanry"),
       .text("Objective-C - NSDictionary/CFDictionary"),
@@ -173,16 +173,14 @@ let presentation = Presentation(pages: [
 
   Page(title: "Direct-Address Tables", contents: [
     .image("./images/direct_addressing.jpg"),
+    .text("Not a Hash Table"),
+    .text("Time complexity"),
     .indent([
-      .text("Not a Hash Table"),
-      .text("Time complexity"),
-      .indent([
-        .text("Insert - O(1) worst case"),
-        .text("Search - O(1) worst case"),
-        .text("Delete - O(1) worst case"),
-      ]),
-      .text("Works well when universe of keys is small"),
+      .text("Insert - O(1) worst case"),
+      .text("Search - O(1) worst case"),
+      .text("Delete - O(1) worst case"),
     ]),
+    .text("Works well when universe of keys is small"),
   ]),
 
   Page(title: "Hash Tables", contents: [
@@ -203,7 +201,7 @@ let presentation = Presentation(pages: [
     ]),
     .text("Why \"average case\" instead of \"worst case\"?"),
     .indent([
-      .text("Because of collisions: h(k2) == h(k5)"),
+      .text("Because of collisions: see h(k2) == h(k5) above"),
       .text("And rehashing"),
     ]),
   ]),
@@ -232,20 +230,16 @@ let presentation = Presentation(pages: [
     .indent([
       .text("Inefficient memory usage"),
       .text("Not cache friendly"),
-      .indent([
-        .image("./images/cache_scaling.jpg"),
-      ]),
+      .image("./images/cache_scaling.jpg"),
     ]),
   ]),
 
   Page(title: "Collision Resolution: Open Addressing", contents: [
-    .image("./images/probing.jpg"),
     .sourceCode(.plainText, "given h'(k) : U -> { 0, 1, ..., m - 1 }"),
     .sourceCode(.plainText, "for i in 0..=(m - 1)"),
     .text("Linear probing"),
     .indent([
       .sourceCode(.plainText, "h(k, i) = (h'(k) + i) mod m"),
-      .sourceCode(.plainText, example_linear_probing),
     ]),
     .text("Quadratic probing"),
     .indent([
@@ -255,9 +249,12 @@ let presentation = Presentation(pages: [
         .sourceCode(.plainText, "let c1 = 1, c2 = 0"),
         .sourceCode(.plainText, "let c1 = 1/2, c2 = 1/2, m is power of 2"),
       ]),
-      .text("If wrong c1, c2 and m is chosen, not all indices will be probed"),
+      .text("If a wrong c1, c2 or m is chosen, not all indices will be probed"),
     ]),
-    .text("Xcode Playground: Probing Sequence Examples"),
+    .text("Linear probing example"),
+    .indent([
+      .sourceCode(.plainText, example_linear_probing),
+    ]),
   ]),
 
   Page(title: "Rehashing", contents: [
