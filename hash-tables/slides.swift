@@ -14,6 +14,100 @@ let example_linear_probing = """
  slot  |  0  |     |     |  3  |  3   |     |     |  7  |
 """
 
+let cf_basic_hash = """
+// __kCFBasicHashLinearHashingValue
+// Linear probing, with c = 1
+// probe[0] = h1(k)
+// probe[i] = (h1(k) + i * c) mod num_buckets, i = 1 .. num_buckets - 1
+// h1(k) = k mod num_buckets
+
+// __kCFBasicHashDoubleHashingValue
+// Double hashing
+// probe[0] = h1(k)
+// probe[i] = (h1(k) + i * h2(k)) mod num_buckets, i = 1 .. num_buckets - 1
+// h1(k) = k mod num_buckets
+// h2(k) = floor(k / num_buckets) mod num_buckets
+
+// __kCFBasicHashExponentialHashingValue
+// Improved exponential hashing
+// probe[0] = h1(k)
+// probe[i] = (h1(k) + pr(k)^i * h2(k)) mod num_buckets, i = 1 .. num_buckets - 1
+// h1(k) = k mod num_buckets
+// h2(k) = floor(k / num_buckets) mod num_buckets
+// note: h2(k) has the effect of rotating the sequence if it is constant
+// note: pr(k) is any primitive root of num_buckets, varying this gives different sequences
+"""
+
+let swift_dict = """
+// `Dictionary` uses two storage schemes: native storage and Cocoa storage.
+//
+// Native storage is a hash table with open addressing and linear probing. The
+// bucket array forms a logical ring (e.g., a chain can wrap around the end of
+// buckets array to the beginning of it).
+//
+// ...
+//
+// In addition to the native storage, `Dictionary` can also wrap an
+// `NSDictionary` in order to allow bridging `NSDictionary` to `Dictionary` in
+// `O(1)`.
+"""
+
+let swift_data_structure = """
+// Native dictionary storage uses a data structure like this:
+//
+//   struct Dictionary<K,V>
+//   +------------------------------------------------+
+//   | enum Dictionary<K,V>._Variant                  |
+//   | +--------------------------------------------+ |
+//   | | [struct _NativeDictionary<K,V>             | |
+//   | +---|----------------------------------------+ |
+//   +----/-------------------------------------------+
+//       /
+//      |
+//      V
+//   class __RawDictionaryStorage
+//   +-----------------------------------------------------------+
+//   | <isa>                                                     |
+//   | <refcount>                                                |
+//   | _count                                                    |
+//   | _capacity                                                 |
+//   | _scale                                                    |
+//   | _age                                                      |
+//   | _seed                                                     |
+//   | _rawKeys                                                  |
+//   | _rawValue                                                 |
+//   | [inline bitset of occupied entries]                       |
+//   | [inline array of keys]                                    |
+//   | [inline array of values]                                  |
+//   +-----------------------------------------------------------+
+//
+// Cocoa storage uses a data structure like this:
+//
+//   struct Dictionary<K,V>
+//   +----------------------------------------------+
+//   | enum Dictionary<K,V>._Variant                |
+//   | +----------------------------------------+   |
+//   | | [ struct __CocoaDictionary             |   |
+//   | +---|------------------------------------+   |
+//   +----/-----------------------------------------+
+//       /
+//      |
+//      V
+//   class NSDictionary
+//   +--------------+
+//   | [refcount#1] |
+//   | etc.         |
+//   +--------------+
+//     ^
+//     |
+//      \\  struct __CocoaDictionary.Index
+//   +--|------------------------------------+
+//   |  * base: __CocoaDictionary            |
+//   |  allKeys: array of all keys           |
+//   |  currentKeyIndex: index into allKeys  |
+//   +---------------------------------------+
+"""
+
 let robin_hood_hashing_1 = """
  index |  0  |  1   |  2  |  3  |  4   |  5  |  6  |  7  |
 -------|-----|------|-----|-----|------|-----|-----|-----|
@@ -282,12 +376,17 @@ let presentation = Presentation(pages: [
 
   Page(title: "Example: NSDictionary/CFDictionary", contents: [
     .text("NSDictionary is-a CFDictionary"),
-    .text("CFDictionary has-a CFBasicHash")
+    .text("CFDictionary has-a CFBasicHash"),
+    .text("CFBasicHashFindBucket.m"),
+    .indent([
+      .sourceCode(.plainText, cf_basic_hash),
+    ]),
   ]),
 
   Page(title: "Example: Swift.Dictionary", contents: [
-    .sourceCode(.plainText, "__RawDictionaryStorage"),
-    .sourceCode(.plainText, "__CocoaDictionary -> NSDictionary")
+    .text("Dictionary.swift"),
+    .sourceCode(.plainText, swift_dict),
+    .sourceCode(.plainText, swift_data_structure),
   ]),
 
   Page(title: "Advanced: Robin Hood Hashing", contents: [
