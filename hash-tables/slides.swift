@@ -70,6 +70,50 @@ let robin_hood_hashing_5 = """
  slot  |  0  |  0   |  0   |  1  |  2  |  3   |     |  7  |
 """
 
+let swiss_table_data_layout = """
+ index |   0    |   1    |   2    |   3    |   4    | ... |   15   |
+-------|--------|--------|--------|--------|--------|     |--------|
+ value |        |        |        |        |        | ... |        |
+-------|--------|--------|--------|--------|--------|     |--------|
+ ctrl  |11111111|11111111|11111111|11111111|11111111| ... |11111111|
+"""
+
+let swiss_table_ctrl_byte = """
+0b11111111  // EMPTY
+0b10000000  // DELETED
+0b0.......  // FULL - The rest 7 bits are set to `h(k) >> (64 - 7)`
+"""
+
+let swiss_table_example = """
+ index |   0    |   1    |   2    |   3    |   4    | ... |   15   |
+-------|--------|--------|--------|--------|--------|     |--------|
+ value | (5,7)  |        | (39,8) |        |garbage | ... |        |
+-------|--------|--------|--------|--------|--------|     |--------|
+ ctrl  |01010111|11111111|00110110|11111111|10000000| ... |11111111|
+"""
+
+let swiss_table_lookup = """
+let ctrls = x86::_mm_load_si128(self.ctrl[i]);
+---------------------------------------------     ------------
+| 01010111 | 11111111 | 00101010 | 10000000 | ... | 11111111 |
+---------------------------------------------     ------------
+
+let key = x86::_mm_set1_epi8(42);
+---------------------------------------------     ------------
+| 00101010 | 00101010 | 00101010 | 00101010 | ... | 00101010 |
+---------------------------------------------     ------------
+
+let compare_result = x86::_mm_cmpeq_epi8(ctrls, key);
+---------------------------------------------     ------------
+| 00000000 | 00000000 | 11111111 | 00000000 | ... | 00000000 |
+---------------------------------------------     ------------
+
+let result = x86::_mm_movemask_epi8(compare_result);
+---------------------------------------------     ------------
+|    0     |    0     |    1     |    0     | ... |    0     |
+---------------------------------------------     ------------
+"""
+
 let presentation = Presentation(pages: [
 
   Page(title: "Hash Tables", subtitle: "An Implementation Detail Series"),
@@ -250,6 +294,7 @@ let presentation = Presentation(pages: [
   ]),
 
   Page(title: "Advanced: Robin Hood Hashing", contents: [
+    .text("Used in Rust std::collections::HashMap"),
     .text("\"Takes away from the rich and gives it to the poor\""),
     .indent([
       .text("Insert (13,3) where h(13) -> 0"),
@@ -265,11 +310,51 @@ let presentation = Presentation(pages: [
       .text("Repeating the process above until (6,6) is happy 😌"),
       .sourceCode(.plainText, robin_hood_hashing_5),
     ]),
-    .text("Used in Rust std::collections::HashMap"),
   ]),
 
   Page(title: "Advanced: Google Swiss Table", contents: [
-    .text("TODO"),
+    .text("Open sourced as absl::flat_hash_map and absl::flat_hash_set"),
+    .text("Also has a Rust implementation called hashbrown::HashMap"),
+    .text("Haven't seen a Swift implementation yet 👀"),
+    .text("An open addressing hash table that is:"),
+    .indent([
+      .text("Faster in basic operations"),
+      .text("More compact in storage"),
+      .text("More cache friendly"),
+    ]),
+    .text("Internally, data are stored in groups of 16 elements"),
+    .indent([
+      .sourceCode(.plainText, swiss_table_data_layout),
+    ]),
+    .text("8-bit control byte"),
+    .indent([
+      .sourceCode(.plainText, swiss_table_ctrl_byte),
+    ]),
+    .text("After a few insertions an deletions"),
+    .indent([
+      .sourceCode(.plainText, swiss_table_example),
+    ]),
+    .text("What about search?"),
+    .indent([
+      .text("Use h(k) to locate the first group"),
+      .text("Introducing SIMD (Single Instruction, Multiple Data)"),
+      .text("More specifically, need a few instructions from SSE2 (Streaming SIMD Extensions 2)"),
+      .indent([
+        .sourceCode(.plainText, "x86::_mm_load_si128    // Loads 128 bit into the register"),
+        .sourceCode(.plainText, "x86::_mm_set1_epi8     // Broadcasts a 8 bit integer into a 128 bit integer"),
+        .sourceCode(.plainText, "x86::_mm_cmpeq_epi8    // Compares two 128 bit (16 * 8 bits) integers"),
+        .sourceCode(.plainText, "x86::_mm_movemask_epi8 // Collapses the 128 bit integer into a 16 bit integer"),
+      ]),
+      .text("Lookup in group `i`"),
+      .indent([
+        .sourceCode(.plainText, swiss_table_lookup),
+      ]),
+      .text("If found potential match, compare the key"),
+      .indent([
+        .text("If keys are equal, finish lookup"),
+        .text("Else move to the next group"),
+      ]),
+    ]),
   ]),
 
   Page(title: "References", contents: [
