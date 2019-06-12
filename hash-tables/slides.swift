@@ -38,6 +38,47 @@ let cf_basic_hash = """
 // note: pr(k) is any primitive root of num_buckets, varying this gives different sequences
 """
 
+let cf_dictionary_create = """
+static CFBasicHashRef __CFDictionaryCreateGeneric(CFAllocatorRef allocator, /* ... */ ) {
+    CFOptionFlags flags = kCFBasicHashLinearHashing; // kCFBasicHashExponentialHashing
+    // ...
+    CFBasicHashRef ht = CFBasicHashCreate(allocator, flags, &callbacks);
+    return ht;
+}
+
+#if CFDictionary
+CFHashRef CFDictionaryCreate(CFAllocatorRef allocator, /* ... */) {
+#endif
+#if CFSet || CFBag
+CFHashRef CFDictionaryCreate(CFAllocatorRef allocator, /* ... */) {
+    // ...
+#endif
+    // ...
+    CFBasicHashRef ht = __CFDictionaryCreateGeneric(allocator, keyCallBacks, valueCallBacks, CFDictionary);
+    if (!ht) return NULL;
+    if (0 < numValues) CFBasicHashSetCapacity(ht, numValues);
+    for (CFIndex idx = 0; idx < numValues; idx++) {
+        CFBasicHashAddValue(ht, (uintptr_t)klist[idx], (uintptr_t)vlist[idx]);
+    }
+    CFBasicHashMakeImmutable(ht);
+    // ...
+    return (CFHashRef)ht;
+}
+
+#if CFDictionary
+CFMutableHashRef CFDictionaryCreateMutable(CFAllocatorRef allocator, /* ... */) {
+#endif
+#if CFSet || CFBag
+CFMutableHashRef CFDictionaryCreateMutable(CFAllocatorRef allocator, /* ... */) {
+    // ...
+#endif
+    // ...
+    CFBasicHashRef ht = __CFDictionaryCreateGeneric(allocator, keyCallBacks, /* ... */);
+    // ...
+    return (CFMutableHashRef)ht;
+}
+"""
+
 let swift_dict = """
 // `Dictionary` uses two storage schemes: native storage and Cocoa storage.
 //
@@ -376,10 +417,14 @@ let presentation = Presentation(pages: [
 
   Page(title: "Example: NSDictionary/CFDictionary", contents: [
     .text("NSDictionary is-a CFDictionary"),
-    .text("CFDictionary has-a CFBasicHash"),
+    .text("CFDictionary is-a CFBasicHash"),
     .text("CFBasicHashFindBucket.m"),
     .indent([
       .sourceCode(.plainText, cf_basic_hash),
+    ]),
+    .text("CFDictionary.c"),
+    .indent([
+      .sourceCode(.c, cf_dictionary_create),
     ]),
   ]),
 
