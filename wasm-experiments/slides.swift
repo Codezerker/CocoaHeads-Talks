@@ -291,6 +291,14 @@ let presentation = Presentation(pages: [
     .indent([
       .sourceCode(.plainText, "JavaScript <-> WebAssembly <-> Rust"),
     ]),
+    .text("How does JavaScript share memory with WebAssembly?"),
+    .indent([
+      .text("WebAssembly has a \"Linear Memory\" model"),
+      .text("The linear memory is a ArrayBuffer simulating the heap"),
+      .text("All frontend langauges allocates from the ArrayBuffer"),
+      .text("Can be grown by a multiple of the page size (64K)"),
+      .text("Cannot be shrunk"),
+    ]),
   ]),
 
   Page(title: "Demo", subtitle: "wasm-unic POC"),
