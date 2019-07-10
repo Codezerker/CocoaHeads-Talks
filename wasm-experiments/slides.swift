@@ -299,6 +299,7 @@ let presentation = Presentation(pages: [
       .text("Can be grown by a multiple of the page size (64K)"),
       .text("Cannot be shrunk"),
     ]),
+    .text("Function pointers are implemented by a global table"),
   ]),
 
   Page(title: "Demo", subtitle: "wasm-unic POC"),
