@@ -255,11 +255,11 @@ let presentation = Presentation(pages: [
   Page(title: "WebAssembly", contents: [
     .sourceCode(.plainText, "wasm32-unknown-unknown"),
     .text("Portable binary format for web browsers (for now)"),
-    .text("All supported browsers recognise the same standard format"),
+    .text("All supported browsers recognise the same standard format (.wasm)"),
     .indent([
       .text("Think of Mach-O on Darwin and ELF on Linux"),
     ]),
-    .text("Also has a human readable representation: S-expression"),
+    .text("Also has a human readable representation: S-expression (.wat)"),
     .indent([
       .text("Think of LLVM Intermediate Representation (IR)"),
     ]),
