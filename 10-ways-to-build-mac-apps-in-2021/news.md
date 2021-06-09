@@ -80,6 +80,10 @@ int main(int argc, char *argv[]) {
 
 ---
 
+![bg](images/wwdc.png)
+
+---
+
 # LIVE near WWDC 2021
 
 https://livenearwwdc.com/
